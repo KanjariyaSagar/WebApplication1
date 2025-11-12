@@ -1,0 +1,370 @@
+@page
+@model DashboardModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container-fluid mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>Admin Dashboard</h1>
+            <p class="text-muted">Manage Users - Clinicians and Patients</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <span class="badge bg-primary me-2">@Model.AdminName</span>
+            <a href="/logout" class="btn btn-sm btn-danger">Logout</a>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">Total Admins</h5>
+                    <h2>@Model.Admins.Count</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">Total Clinicians</h5>
+                    <h2>@Model.Clinicians.Count</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">Total Patients</h5>
+                    <h2>@Model.Patients.Count</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <h2>@(Model.Clinicians.Count + Model.Patients.Count + Model.Admins.Count)</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs for User Management -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="admins-tab" data-bs-toggle="tab" data-bs-target="#admins" type="button" role="tab">
+                Admins
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="clinicians-tab" data-bs-toggle="tab" data-bs-target="#clinicians" type="button" role="tab">
+                Clinicians
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="patients-tab" data-bs-toggle="tab" data-bs-target="#patients" type="button" role="tab">
+                Patients
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- Admins Tab -->
+        <div class="tab-pane fade show active" id="admins" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>Admins Management</h4>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#assignAdminModal">
+                    + Assign Admin Role
+                </button>
+            </div>
+
+            @if (Model.Admins.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role Type</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var admin in Model.Admins)
+                            {
+                                <tr>
+                                    <td>@admin.Id</td>
+                                    <td>@admin.Name</td>
+                                    <td>@admin.Email</td>
+                                    <td><span class="badge bg-info">@admin.RoleType</span></td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" onclick="editAdmin('@admin.Id')">Edit</button>
+                                        <button class="btn btn-sm btn-danger" onclick="removeAdmin('@admin.Id')">Remove Admin</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">No additional admins found. <a href="#" data-bs-toggle="modal" data-bs-target="#assignAdminModal">Assign one now</a></div>
+            }
+        </div>
+
+        <!-- Clinicians Tab -->
+        <div class="tab-pane fade" id="clinicians" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>Clinicians Management</h4>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClinicianModal">
+                    + Add Clinician
+                </button>
+            </div>
+
+            @if (Model.Clinicians.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Specialization</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var clinician in Model.Clinicians)
+                            {
+                                <tr>
+                                    <td>@clinician.Id</td>
+                                    <td>@clinician.Name</td>
+                                    <td>@clinician.Email</td>
+                                    <td>@clinician.Specialization</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" onclick="editClinician('@clinician.Id')">Edit</button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteClinician('@clinician.Id')">Delete</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">No clinicians found. <a href="#" data-bs-toggle="modal" data-bs-target="#addClinicianModal">Add one now</a></div>
+            }
+        </div>
+
+        <!-- Patients Tab -->
+        <div class="tab-pane fade" id="patients" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>Patients Management</h4>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPatientModal">
+                    + Add Patient
+                </button>
+            </div>
+
+            @if (Model.Patients.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Age</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var patient in Model.Patients)
+                            {
+                                <tr>
+                                    <td>@patient.Id</td>
+                                    <td>@patient.Name</td>
+                                    <td>@patient.Email</td>
+                                    <td>@patient.Age</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" onclick="editPatient('@patient.Id')">Edit</button>
+                                        <button class="btn btn-sm btn-danger" onclick="deletePatient('@patient.Id')">Delete</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">No patients found. <a href="#" data-bs-toggle="modal" data-bs-target="#addPatientModal">Add one now</a></div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Assign Admin Modal -->
+<div class="modal fade" id="assignAdminModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Assign Admin Role</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-page-handler="AssignAdmin">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="adminName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="adminName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="adminEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="adminEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="adminRoleType" class="form-label">Role Type</label>
+                        <select class="form-control" id="adminRoleType" name="roleType" required>
+                            <option value="">Select Role Type</option>
+                            <option value="Super Admin">Super Admin</option>
+                            <option value="User Manager">User Manager</option>
+                            <option value="Support Admin">Support Admin</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="adminPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="adminPassword" name="password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Assign Admin Role</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Clinician Modal -->
+<div class="modal fade" id="addClinicianModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Clinician</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-page-handler="AddClinician">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="clinicianName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="clinicianName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="clinicianEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="clinicianEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="clinicianSpecialization" class="form-label">Specialization</label>
+                        <input type="text" class="form-control" id="clinicianSpecialization" name="specialization" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="clinicianPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="clinicianPassword" name="password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add Clinician</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Patient Modal -->
+<div class="modal fade" id="addPatientModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Patient</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-page-handler="AddPatient">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="patientName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="patientName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="patientEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="patientEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="patientAge" class="form-label">Age</label>
+                        <input type="number" class="form-control" id="patientAge" name="age" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="patientPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="patientPassword" name="password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add Patient</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function editAdmin(id) {
+        alert('Edit functionality for admin ' + id);
+        // TODO: Implement edit functionality
+    }
+
+    function removeAdmin(id) {
+        if (confirm('Are you sure you want to remove admin privileges from this user?')) {
+            // TODO: Implement remove admin functionality
+            alert('Admin ' + id + ' admin role removed');
+        }
+    }
+
+    function editClinician(id) {
+        alert('Edit functionality for clinician ' + id);
+        // TODO: Implement edit functionality
+    }
+
+    function deleteClinician(id) {
+        if (confirm('Are you sure you want to delete this clinician?')) {
+            // TODO: Implement delete functionality
+            alert('Clinician ' + id + ' deleted');
+        }
+    }
+
+    function editPatient(id) {
+        alert('Edit functionality for patient ' + id);
+        // TODO: Implement edit functionality
+    }
+
+    function deletePatient(id) {
+        if (confirm('Are you sure you want to delete this patient?')) {
+            // TODO: Implement delete functionality
+            alert('Patient ' + id + ' deleted');
+        }
+    }
+</script>
